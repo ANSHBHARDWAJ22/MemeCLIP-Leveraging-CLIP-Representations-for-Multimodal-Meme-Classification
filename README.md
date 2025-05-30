@@ -102,7 +102,7 @@ This is known as **Semantic-Aware Initialization (SAI)** — helping the classif
 
 ---
 
-### ✅ Summary
+###  Summary
 
 | Component             | Purpose                                                        |
 |-----------------------|----------------------------------------------------------------|
