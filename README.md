@@ -39,47 +39,77 @@ MemeCLIP is a lightweight and efficient extension of the CLIP architecture, spec
 
 ---
 
-## Architecture
+## 🔧 Architecture Overview
 
-> **"Why do we pass image and text embeddings through separate Linear layers?"**
-
-### Short Answer
-
-CLIP already encodes both image and text into a **shared embedding space**.  
-But in the case of memes, **image and text often play very different roles** — the sarcasm or punchline might be in the text, while the image carries the emotional tone or context.
-
-So, we introduce separate **linear projection layers** for image and text:
-
-- To **transform their features independently**
-- So that **modality-specific signals** (visual or textual) become more pronounced
-- And to make the **multimodal fusion more meaningful**
+MemeCLIP is a lightweight, CLIP-based architecture optimized for multimodal meme classification. It leverages CLIP’s strong pre-trained encoders but introduces a few key components to adapt to the unique challenges of meme data — such as sarcasm, contrast, and noisy supervision.
 
 ---
 
-## Why Feature Adapters?
+### 1. CLIP Encoders (Frozen)
 
-CLIP’s encoders are powerful, but:
+We use the standard CLIP image and text encoders:
 
-- They’re trained on **generic, large-scale datasets**
-- Meme datasets are **small, noisy, and domain-specific**
-- Fine-tuning CLIP directly risks **overfitting** and **loss of pre-trained knowledge**
+- `EI(I)` → image embedding `FI ∈ ℝ⁷⁶⁸`
+- `ET(T)` → text embedding `FT ∈ ℝ⁷⁶⁸`
 
-### The Solution: Lightweight Adapters
-
-Adapters are **small trainable modules** added between frozen layers.  
-They allow **task-specific tuning** while keeping the majority of the model (CLIP) unchanged.
+These encoders are **frozen** during training to retain their robust multimodal understanding.
 
 ---
 
-## Adapter Block Internals: Architecture + Math
+### 2. Modality-Specific Projections
 
-In PyTorch-like pseudocode, the Adapter block looks like this:
+Memes often have **contrasting visual and textual content**. Instead of forcing both into the same embedding space directly, we use **separate linear layers** for each:
 
-```python
-def Adapter(x):
-    down = Linear(d_model, d_adapter)(x)   # Compress dimensions
-    act  = ReLU()(down)                    # Apply non-linearity
-    up   = Linear(d_adapter, d_model)(act) # Project back to original size
-    return x + up                          # Add residual connection
+- `F_proj_I = L_proj_I(FI)`
+- `F_proj_T = L_proj_T(FT)`
 
+This maps both to `ℝ¹⁰²⁴`, aligning them with CLIP's final hidden dimension, while keeping modality-specific signals intact.
 
+---
+
+### 3. Feature Adapters + Residual Blending
+
+To avoid overfitting on small datasets, we introduce **Feature Adapters** — small trainable modules that refine the features without destroying pre-trained knowledge.
+
+Each adapter output is blended with the original projection using a residual ratio `α`:
+
+- `F_final_I = α × Adapter_I(F_proj_I) + (1 − α) × F_proj_I`
+- `F_final_T = α × Adapter_T(F_proj_T) + (1 − α) × F_proj_T`
+
+This enables **controlled fine-tuning**, preserving generalization while adapting to meme-specific data.
+
+---
+
+### 4. Multimodal Fusion
+
+Instead of using heavy cross-modal attention (like in MOMENTA), we fuse image and text features with a simple but effective **element-wise multiplication**:
+
+- `F_MM = F_final_I ⊙ F_final_T`
+
+This yields a rich multimodal representation with minimal additional parameters.
+
+---
+
+### 5. Cosine Classifier with Semantic Initialization
+
+We use a **cosine similarity-based classifier**, which is robust under **class imbalance**.
+
+The classifier weights are initialized using CLIP's text encoder with semantic prompts like:
+
+> `"A photo of {CLASS_NAME}"`
+
+This is known as **Semantic-Aware Initialization (SAI)** — helping the classifier generalize better from the start.
+
+---
+
+### ✅ Summary
+
+| Component             | Purpose                                                        |
+|-----------------------|----------------------------------------------------------------|
+| Frozen CLIP Encoders  | Preserve strong pre-trained visual-linguistic understanding    |
+| Linear Projections    | Disentangle modality-specific signals                          |
+| Feature Adapters      | Prevent overfitting, retain CLIP knowledge                     |
+| Residual Connections  | Blend old + new knowledge safely                               |
+| Element-wise Fusion   | Lightweight multimodal representation                          |
+| Cosine Classifier     | Handles class imbalance well, no need for retraining           |
+| SAI Init              | Uses text semantics to guide classifier from the beginning      |
