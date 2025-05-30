@@ -1,0 +1,1 @@
+# MemeCLIP-Leveraging-CLIP-Representations-for-Multimodal-Meme-Classification
