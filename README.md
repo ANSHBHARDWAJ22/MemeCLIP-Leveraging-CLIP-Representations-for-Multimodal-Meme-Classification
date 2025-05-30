@@ -39,3 +39,47 @@ MemeCLIP is a lightweight and efficient extension of the CLIP architecture, spec
 
 ---
 
+## Architecture
+
+> **"Why do we pass image and text embeddings through separate Linear layers?"**
+
+### Short Answer
+
+CLIP already encodes both image and text into a **shared embedding space**.  
+But in the case of memes, **image and text often play very different roles** — the sarcasm or punchline might be in the text, while the image carries the emotional tone or context.
+
+So, we introduce separate **linear projection layers** for image and text:
+
+- To **transform their features independently**
+- So that **modality-specific signals** (visual or textual) become more pronounced
+- And to make the **multimodal fusion more meaningful**
+
+---
+
+## Why Feature Adapters?
+
+CLIP’s encoders are powerful, but:
+
+- They’re trained on **generic, large-scale datasets**
+- Meme datasets are **small, noisy, and domain-specific**
+- Fine-tuning CLIP directly risks **overfitting** and **loss of pre-trained knowledge**
+
+### The Solution: Lightweight Adapters
+
+Adapters are **small trainable modules** added between frozen layers.  
+They allow **task-specific tuning** while keeping the majority of the model (CLIP) unchanged.
+
+---
+
+## Adapter Block Internals: Architecture + Math
+
+In PyTorch-like pseudocode, the Adapter block looks like this:
+
+```python
+def Adapter(x):
+    down = Linear(d_model, d_adapter)(x)   # Compress dimensions
+    act  = ReLU()(down)                    # Apply non-linearity
+    up   = Linear(d_adapter, d_model)(act) # Project back to original size
+    return x + up                          # Add residual connection
+
+
