@@ -1,6 +1,7 @@
 # MemeCLIP: Leveraging CLIP Representations for Multimodal Meme Classification
 
-![Uploading Screenshot 2025-11-02 152251.png…]()
+<img width="1186" height="618" alt="Screenshot 2025-11-02 152251" src="https://github.com/user-attachments/assets/6de8415f-2b96-4d7d-8e07-26f75a70deb8" />
+
 
 
 ## How MemeCLIP is Different from Original CLIP and Prior Models
