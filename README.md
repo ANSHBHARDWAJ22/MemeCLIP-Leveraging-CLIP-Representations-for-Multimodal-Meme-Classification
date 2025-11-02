@@ -1,6 +1,7 @@
 # MemeCLIP: Leveraging CLIP Representations for Multimodal Meme Classification
 
-![MemeCLIP Architecture](https://github.com/user-attachments/assets/35d56737-2435-4790-af94-d38e8050dec1)
+![Uploading Screenshot 2025-11-02 152251.png…]()
+
 
 ## How MemeCLIP is Different from Original CLIP and Prior Models
 
