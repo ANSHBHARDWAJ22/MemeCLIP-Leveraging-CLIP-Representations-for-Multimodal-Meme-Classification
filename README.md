@@ -1,6 +1,7 @@
 # MemeSense: Vision-Language Understanding for Meme Classification
 
-<img width="1025" height="523" alt="Screenshot 2026-02-12 192138" src="https://github.com/user-attachments/assets/c405d063-5cc4-43da-8edb-17283160034d" />
+<img width="874" height="438" alt="Untitled Diagram drawio (1)" src="https://github.com/user-attachments/assets/82c1377b-82c0-4673-b2c4-90bdd001f407" />
+
 
 
 
